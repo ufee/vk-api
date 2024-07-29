@@ -3,13 +3,14 @@
 [![Build Status](https://travis-ci.org/getjump/VkApiPHP.svg?branch=master)](https://travis-ci.org/getjump/VkApiPHP)
 [![Code Style Status](https://styleci.io/repos/19418792/shield)](https://styleci.io/repos/19418792)
 
+Fork from [getjump/vk](https://github.com/getjump/VkApiPHP)  
 That library will help you organize your work with API Vk.com
 
 ## Installation
 
 You can get library and all of it dependencies through [composer](https://getcomposer.org/)
 
-`composer require "getjump/vk:*"`
+`composer require ufee/vk-api`
 
 ## Explanation
 
