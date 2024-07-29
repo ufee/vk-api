@@ -1,5 +1,5 @@
 {
-    "name": "ufee/vk",
+    "name": "ufee/vk-api",
     "description": "Library for work with API Vk.com",
     "keywords": ["vk", "vk.com", "vkontakte", "вк", "вконтакте"],
     "license": "MIT",
