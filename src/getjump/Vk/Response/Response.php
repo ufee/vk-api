@@ -29,6 +29,7 @@ class Response implements \ArrayAccess, \Countable, \Iterator
 
     private int $pointer = 0;
     private array $extendedFields = [];
+    private array $extendedValues = [];
 
     /**
      * Response constructor.
@@ -45,7 +46,7 @@ class Response implements \ArrayAccess, \Countable, \Iterator
                 continue;
             }
 
-            $this->{$key} = $value;
+            $this->extendedValues[$key] = $value;
             $this->extendedFields[] = $key;
         }
 
@@ -123,7 +124,7 @@ class Response implements \ArrayAccess, \Countable, \Iterator
         $temp = [];
 
         foreach ($this->extendedFields as $key) {
-            $temp[$key] = $this->{$key};
+            $temp[$key] = $this->extendedValues[$key];
         }
 
         return (object) $temp;
