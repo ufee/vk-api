@@ -27,17 +27,19 @@ class Response implements \ArrayAccess, \Countable, \Iterator
      */
     public $data = false;
 
-    private $pointer = 0;
-    private $extendedFields = [];
+    private int $pointer = 0;
+    private array $extendedFields = [];
 
     /**
      * Response constructor.
      *
-     * @param $data
-     * @param bool|Closure $callback
+     * @param array|object $data
+     * @param Closure|bool|null $callback
      */
-    public function __construct($data, $callback = false)
+    public function __construct(array|object $data, $callback = null)
     {
+        $data = (array) $data;
+
         foreach ($data as $key => $value) {
             if (property_exists($this, $key)) {
                 continue;
@@ -47,19 +49,20 @@ class Response implements \ArrayAccess, \Countable, \Iterator
             $this->extendedFields[] = $key;
         }
 
-        if (is_callable($callback) && isset($data->items)) {
-            foreach ($data->items as $d) {
-                $this->items[] = call_user_func_array($callback, [$d]);
+        if ($callback && isset($data['items'])) {
+            foreach ($data['items'] as $d) {
+                $this->items[] = call_user_func($callback, $d);
             }
         } else {
-            $this->items = !isset($data->items) ? false : $data->items;
+            $this->items = $data['items'] ?? false;
         }
-        $this->count = !isset($data->count) ? false : $data->count;
-        if (is_array($data) || !isset($data->items)) {
-            $this->count = count($data);
-            if (is_array($data) && is_callable($callback)) {
+
+        $this->count = $data['count'] ?? count($data);
+
+        if (is_array($data) && !$this->items) {
+            if ($callback) {
                 foreach ($data as $d) {
-                    $this->data[] = call_user_func_array($callback, [$d]);
+                    $this->data[] = call_user_func($callback, $d);
                 }
             } else {
                 $this->data = $data;
@@ -73,26 +76,23 @@ class Response implements \ArrayAccess, \Countable, \Iterator
         if ($this->items) {
             $this->data = &$this->items;
         }
-
-        if (is_object($data) && is_callable($callback)) {
-            $this->data = call_user_func_array($callback, [$data]);
+        if (is_object($data) && $callback) {
+            $this->data = call_user_func($callback, $data);
         }
     }
 
     /**
-     * This method takes Closure as argument, so every element from response will go into this Closure.
+     * This method takes Closure as argument, so every element from
+     * response will go into this Closure.
      *
      * @param Closure $callback
      */
-    public function each(Closure $callback)
+    public function each(Closure $callback): void
     {
-        if (!is_callable($callback)) {
-            return;
-        }
-        $data = [];
-        $this->items ? $data = &$this->items : (!$this->data ?: $data = &$this->data);
+        $data = &$this->items ?: $this->data ?: [];
+
         foreach ($data as $k => $v) {
-            call_user_func_array($callback, [$k, $v]);
+            call_user_func($callback, $k, $v);
         }
     }
 
@@ -167,53 +167,53 @@ class Response implements \ArrayAccess, \Countable, \Iterator
         return $this->data;
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->items[$offset]);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->items[$offset];
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->itmes[$offset] = $value;
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->items[$offset]);
     }
 
-    public function count()
+    public function count(): int
     {
         return count($this->items);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->pointer = 0;
     }
 
-    public function current()
+    public function current(): mixed
     {
         return $this->items[$this->pointer];
     }
 
-    public function key()
+    public function key(): int
     {
         return $this->pointer;
     }
 
-    public function next()
+    public function next(): void
     {
         $this->pointer++;
     }
 
-    public function valid()
+    public function valid(): bool
     {
-        return isset($this[$this->pointer]);
+        return isset($this->items[$this->pointer]);
     }
 }
